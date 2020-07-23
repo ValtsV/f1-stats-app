@@ -25,12 +25,22 @@ const RootQueryType = new GraphQLObjectType({
       args: {
         id: { type: GraphQLString },
       },
-      description: "List of All Drivers",
+      description: "Returns driver",
       resolve: (parentValue, args) => {
         return axios
           .get(`http://ergast.com/api/f1/drivers/${args.id}.json`)
           .then((res) => {
             return res.data.MRData.DriverTable.Drivers[0];
+          });
+      },
+    },
+    drivers: {
+      type: new GraphQLList(DriverType),
+      resolve: () => {
+        return axios
+          .get("http://ergast.com/api/f1/drivers.json")
+          .then((res) => {
+            return res.data.MRData.DriverTable.Drivers;
           });
       },
     },
