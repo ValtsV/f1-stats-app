@@ -38,7 +38,7 @@ const RootQueryType = new GraphQLObjectType({
       type: new GraphQLList(DriverType),
       resolve: () => {
         return axios
-          .get("http://ergast.com/api/f1/drivers.json")
+          .get("http://ergast.com/api/f1/drivers.json?limit=1500")
           .then((res) => {
             return res.data.MRData.DriverTable.Drivers;
           });
