@@ -11,9 +11,8 @@ const { response } = require("express");
 const DriverType = new GraphQLObjectType({
   name: "Driver",
   fields: () => ({
-    driverId: { type: GraphQLString },
-    givenName: { type: GraphQLString },
-    familyName: { type: GraphQLString },
+    round: { type: GraphQLString },
+    raceName: { type: GraphQLString },
   }),
 });
 
@@ -21,16 +20,18 @@ const RootQueryType = new GraphQLObjectType({
   name: "RootQuery",
   fields: () => ({
     driver: {
-      type: DriverType,
+      type: new GraphQLList(DriverType),
       args: {
         id: { type: GraphQLString },
       },
       description: "Returns driver",
-      resolve: (parentValue, args) => {
+      resolve: (parent, args) => {
         return axios
-          .get(`http://ergast.com/api/f1/drivers/${args.id}.json`)
+          .get(
+            `https://ergast.com/api/f1/drivers/${args.id}/results.json?limit=400`
+          )
           .then((res) => {
-            return res.data.MRData.DriverTable.Drivers[0];
+            return res.data.MRData.RaceTable.Races;
           });
       },
     },
