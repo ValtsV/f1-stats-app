@@ -10,6 +10,22 @@ const {
 const axios = require("axios");
 const { response } = require("express");
 
+const DriverInfoType = new GraphQLObjectType({
+  name: "DriverInfo",
+  fields: () => ({
+    driverId: { type: GraphQLString },
+    givenName: { type: GraphQLString },
+    familyName: { type: GraphQLString },
+  }),
+});
+
+const SeasonType = new GraphQLObjectType({
+  name: "Season",
+  fields: () => ({
+    season: { type: GraphQLString },
+  }),
+});
+
 const DriverType = new GraphQLObjectType({
   name: "Driver",
   fields: () => ({
@@ -115,20 +131,36 @@ const RootQueryType = new GraphQLObjectType({
               return driverData;
             })
           );
-        // return axios
-        //   .get(
-        //     `https://ergast.com/api/f1/drivers/${args.id}/results.json?limit=400`
-        //   )
-        //   .then((res) => {
-        //     return res.data.MRData.RaceTable.Races;
-        //   });
       },
     },
     drivers: {
-      type: new GraphQLList(DriverType),
+      type: new GraphQLList(DriverInfoType),
       resolve: () => {
         return axios
           .get("http://ergast.com/api/f1/drivers.json?limit=1500")
+          .then((res) => {
+            return res.data.MRData.DriverTable.Drivers;
+          });
+      },
+    },
+    seasons: {
+      type: new GraphQLList(SeasonType),
+      resolve: () => {
+        return axios
+          .get("https://ergast.com/api/f1/seasons.json?limit=100")
+          .then((res) => {
+            return res.data.MRData.SeasonTable.Seasons;
+          });
+      },
+    },
+    season: {
+      type: new GraphQLList(DriverInfoType),
+      args: {
+        year: { type: GraphQLString },
+      },
+      resolve: (parent, args) => {
+        return axios
+          .get(`http://ergast.com/api/f1/${args.year}/drivers.json?limit=100`)
           .then((res) => {
             return res.data.MRData.DriverTable.Drivers;
           });
